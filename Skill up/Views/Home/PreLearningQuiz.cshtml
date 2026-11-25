@@ -1,0 +1,358 @@
+@model Skill_up.Models.PreLearningQuizViewModel
+@{
+    ViewData["Title"] = $"แบบทดสอบก่อนเรียน - {Model.CategoryName}";
+}
+
+<div class="quiz-framework">
+    <div class="quiz-shell">
+        <a class="quiz-back" asp-controller="Home" asp-action="Category" asp-route-skill="@Model.CategoryName">← กลับไปที่ @Model.CategoryName</a>
+        <div class="quiz-heading">
+            <span>PRE-LEARNING ASSESSMENT</span>
+            <h1>แบบทดสอบก่อนเรียน</h1>
+            <p>ประเมินพื้นฐานของคุณก่อนเริ่มเรียนหมวด @Model.CategoryName</p>
+        </div>
+
+        @if (Model.IsSubmitted)
+        {
+            <section class="quiz-result" data-quiz-result>
+                <span class="quiz-result-icon">@(Model.Passed ? "✓" : "✦")</span>
+                <small>ผลการประเมินก่อนเรียน</small>
+                <h2>คุณได้ @Model.Score%</h2>
+                <p>@(Model.Passed ? "คุณมีพื้นฐานที่ดี พร้อมเริ่มเรียนหมวดนี้ได้เลย" : "ไม่เป็นไร ลองเริ่มจากบทเรียนพื้นฐานเพื่อพัฒนาทักษะของคุณ")</p>
+                <a class="quiz-result-link" asp-controller="Home" asp-action="Category" asp-route-skill="@Model.CategoryName" onclick="event.preventDefault(); history.replaceState(null, '', '/Home/Index'); window.location.href = this.href;">ดูคอร์ส @Model.CategoryName <span>→</span></a>
+                <a class="quiz-retry" asp-controller="Home" asp-action="PreLearningQuiz" asp-route-skill="@Model.CategoryName">ทำแบบทดสอบอีกครั้ง</a>
+            </section>
+        }
+        else
+        {
+            <div class="quiz-progress"><i style="width:100%"></i></div>
+            <form asp-controller="Home" asp-action="PreLearningQuiz" method="post" class="quiz-card">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="skill" value="@Model.CategoryName" />
+                <div class="quiz-question-count">คำถาม <b>@Model.Questions.Count</b> ข้อ</div>
+                @for (var questionIndex = 0; questionIndex < Model.Questions.Count; questionIndex++)
+                {
+                    var question = Model.Questions[questionIndex];
+                    <div class="question-card">
+                        <h4 class="question-title">@(questionIndex + 1). @question.Text</h4>
+                        <div class="quiz-options">
+                            @for (var optionIndex = 0; optionIndex < question.Options.Count; optionIndex++)
+                            {
+                                <label class="quiz-option" data-option="@((char)('A' + optionIndex))">
+                                    <input type="radio" name="answers[@questionIndex]" value="@optionIndex" required />
+                                    <span>@question.Options[optionIndex]</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+                }
+                <button type="submit" class="quiz-next">ส่งคำตอบ <span>→</span></button>
+            </form>
+        }
+    </div>
+</div>
+
+<style>
+    .quiz-framework {
+        background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%) !important;
+    }
+
+    .quiz-framework .quiz-heading h1 {
+        color: #172554 !important;
+        letter-spacing: -.8px;
+    }
+
+    .quiz-framework .quiz-heading p {
+        color: #64748b !important;
+    }
+
+    .quiz-framework .quiz-card,
+    .quiz-framework .quiz-result {
+        border: 1px solid #dbe5f1 !important;
+        border-radius: 24px !important;
+        background: rgba(255, 255, 255, .94) !important;
+        box-shadow: 0 18px 40px rgba(45, 70, 120, .12) !important;
+    }
+
+    .quiz-framework .quiz-question-count {
+        color: #64748b !important;
+        font-weight: 600;
+    }
+
+    .quiz-framework .pre-learning-question {
+        margin: 18px 0 0;
+        padding: 22px;
+        border: 1px solid #dbe5f1 !important;
+        border-radius: 18px;
+        background: #f8fbff !important;
+    }
+
+    .quiz-framework .pre-learning-question legend {
+        width: 100%;
+        margin-bottom: 14px;
+        color: #172554 !important;
+        font-size: 17px;
+        font-weight: 800;
+        line-height: 1.5;
+    }
+
+    .quiz-framework .pre-learning-question .quiz-options {
+        gap: 12px;
+    }
+
+    .quiz-framework .pre-learning-question .quiz-option {
+        min-height: 62px;
+        border: 1px solid #d7e1ef !important;
+        border-radius: 14px;
+        background: #ffffff !important;
+        color: #334155 !important;
+        box-shadow: 0 5px 12px rgba(51, 65, 85, .06);
+        transition: border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease;
+    }
+
+    .quiz-framework .pre-learning-question .quiz-option:hover {
+        border-color: #818cf8 !important;
+        background: #eef2ff !important;
+        color: #312e81 !important;
+        box-shadow: 0 8px 18px rgba(99, 102, 241, .14);
+        transform: translateY(-2px);
+    }
+
+    .quiz-framework .pre-learning-question .quiz-option::before {
+        border-color: #c7d2fe !important;
+        background: #eef2ff !important;
+        color: #4f46e5 !important;
+        font-weight: 800;
+    }
+
+    .quiz-framework .quiz-next {
+        margin-top: 20px;
+        border-radius: 13px;
+        background: linear-gradient(110deg, #6366f1, #4f46e5) !important;
+        box-shadow: 0 10px 20px rgba(79, 70, 229, .22);
+    }
+
+    html.dark-theme .quiz-framework,
+    body.dark-mode .quiz-framework {
+        background: linear-gradient(180deg, #0f172a 0%, #111827 100%) !important;
+        color: #f8fafc !important;
+    }
+
+    html.dark-theme .quiz-framework .quiz-heading h1,
+    body.dark-mode .quiz-framework .quiz-heading h1,
+    html.dark-theme .quiz-framework .quiz-question-count,
+    body.dark-mode .quiz-framework .quiz-question-count,
+    html.dark-theme .quiz-framework .pre-learning-question legend,
+    body.dark-mode .quiz-framework .pre-learning-question legend {
+        color: #f8fafc !important;
+    }
+
+    html.dark-theme .quiz-framework .quiz-heading p,
+    body.dark-mode .quiz-framework .quiz-heading p {
+        color: #cbd5e1 !important;
+    }
+
+    html.dark-theme .quiz-framework .quiz-card,
+    body.dark-mode .quiz-framework .quiz-card,
+    html.dark-theme .quiz-framework .quiz-result,
+    body.dark-mode .quiz-framework .quiz-result {
+        border-color: #334155 !important;
+        background: #1e293b !important;
+        box-shadow: 0 18px 40px rgba(2, 6, 23, .35) !important;
+    }
+
+    html.dark-theme .quiz-framework .pre-learning-question,
+    body.dark-mode .quiz-framework .pre-learning-question {
+        border-color: #334155 !important;
+        background: #172235 !important;
+    }
+
+    html.dark-theme .quiz-framework .pre-learning-question .quiz-option,
+    body.dark-mode .quiz-framework .pre-learning-question .quiz-option {
+        border-color: #475569 !important;
+        background: #263349 !important;
+        color: #f8fafc !important;
+        box-shadow: none;
+    }
+
+    html.dark-theme .quiz-framework .pre-learning-question .quiz-option:hover,
+    body.dark-mode .quiz-framework .pre-learning-question .quiz-option:hover {
+        border-color: #818cf8 !important;
+        background: rgba(99, 102, 241, .25) !important;
+        color: #ffffff !important;
+        box-shadow: 0 8px 18px rgba(99, 102, 241, .2);
+    }
+
+    html.dark-theme .quiz-framework .pre-learning-question .quiz-option::before,
+    body.dark-mode .quiz-framework .pre-learning-question .quiz-option::before {
+        border-color: #818cf8 !important;
+        background: #373f75 !important;
+        color: #ffffff !important;
+    }
+
+    html.dark-theme .quiz-framework .quiz-result p,
+    body.dark-mode .quiz-framework .quiz-result p,
+    html.dark-theme .quiz-framework .quiz-result small,
+    body.dark-mode .quiz-framework .quiz-result small {
+        color: #cbd5e1 !important;
+    }
+
+    .quiz-framework .quiz-heading {
+        max-width: 720px;
+        margin: 0 auto 24px;
+        text-align: center;
+    }
+
+    .quiz-framework .quiz-heading h1 {
+        margin: 12px 0 8px;
+        line-height: 1.25;
+    }
+
+    .quiz-framework .pre-learning-question {
+        padding: 28px 22px 22px;
+    }
+
+    .quiz-framework .pre-learning-question legend {
+        position: relative;
+        padding: 0 10px;
+        background: inherit;
+    }
+
+    .quiz-framework .pre-learning-question .quiz-option:has(input:checked) {
+        border: 2px solid #6366f1 !important;
+        background: #eef2ff !important;
+        color: #312e81 !important;
+        box-shadow: 0 8px 18px rgba(99, 102, 241, .2);
+        transform: translateY(-1px);
+    }
+
+    .quiz-framework .pre-learning-question .quiz-option:has(input:checked)::before {
+        border-color: #6366f1 !important;
+        background: #6366f1 !important;
+        color: #ffffff !important;
+    }
+
+    .quiz-framework .pre-learning-question .quiz-option input {
+        accent-color: #6366f1;
+    }
+
+    html.dark-theme .quiz-framework .pre-learning-question .quiz-option:has(input:checked),
+    body.dark-mode .quiz-framework .pre-learning-question .quiz-option:has(input:checked) {
+        border: 2px solid #a5b4fc !important;
+        background: rgba(99, 102, 241, .42) !important;
+        color: #ffffff !important;
+        box-shadow: 0 8px 20px rgba(99, 102, 241, .3);
+    }
+
+    html.dark-theme .quiz-framework .pre-learning-question .quiz-option:has(input:checked)::before,
+    body.dark-mode .quiz-framework .pre-learning-question .quiz-option:has(input:checked)::before {
+        border-color: #818cf8 !important;
+        background: #6366f1 !important;
+        color: #ffffff !important;
+    }
+
+    html.dark-theme .quiz-framework .pre-learning-question .quiz-option span,
+    body.dark-mode .quiz-framework .pre-learning-question .quiz-option span {
+        color: #f8fafc !important;
+    }
+
+    .quiz-framework .question-card {
+        margin: 18px 0;
+        padding: 24px;
+        border: 1px solid #dbe5f1;
+        border-radius: 16px;
+        background: #f8fbff;
+    }
+
+    .quiz-framework .question-title {
+        margin: 0 0 16px;
+        color: #172554;
+        font-size: 17px;
+        font-weight: 800;
+        line-height: 1.5;
+    }
+
+    .quiz-framework .question-card .quiz-option span {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: inherit !important;
+    }
+
+    .quiz-framework .question-card .quiz-option:has(input:checked) {
+        border: 2px solid #6366f1 !important;
+        background: #eef2ff !important;
+        color: #312e81 !important;
+    }
+
+    .quiz-framework .question-card .quiz-option:has(input:checked)::before {
+        border-color: #6366f1 !important;
+        background: #6366f1 !important;
+        color: #ffffff !important;
+    }
+
+    html.dark-theme .quiz-framework .question-card,
+    body.dark-mode .quiz-framework .question-card {
+        border: 1px solid #334155 !important;
+        background: #1e293b !important;
+    }
+
+    html.dark-theme .quiz-framework .question-title,
+    body.dark-mode .quiz-framework .question-title {
+        color: #f8fafc !important;
+    }
+
+    html.dark-theme .quiz-framework .question-card .quiz-option,
+    body.dark-mode .quiz-framework .question-card .quiz-option {
+        border-color: #475569 !important;
+        background: #263349 !important;
+        color: #f8fafc !important;
+    }
+
+    html.dark-theme .quiz-framework .question-card .quiz-option:hover,
+    body.dark-mode .quiz-framework .question-card .quiz-option:hover {
+        border-color: #64748b !important;
+        background: #334155 !important;
+    }
+
+    html.dark-theme .quiz-framework .question-card .quiz-option:has(input:checked),
+    body.dark-mode .quiz-framework .question-card .quiz-option:has(input:checked) {
+        border: 2px solid #818cf8 !important;
+        background: rgba(99, 102, 241, .25) !important;
+        color: #ffffff !important;
+    }
+
+    html.dark-theme .quiz-framework .question-card .quiz-option:has(input:checked)::before,
+    body.dark-mode .quiz-framework .question-card .quiz-option:has(input:checked)::before {
+        border-color: #818cf8 !important;
+        background: #6366f1 !important;
+        color: #ffffff !important;
+    }
+
+    .quiz-framework .question-card {
+        height: auto !important;
+        margin-bottom: 20px;
+        overflow: visible;
+    }
+
+    .quiz-framework .question-card .quiz-option {
+        display: flex !important;
+        align-items: center;
+        gap: 12px;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 48px;
+        padding: 12px 16px !important;
+        overflow: visible;
+    }
+
+    .quiz-framework .question-card .quiz-option > span {
+        width: auto !important;
+        max-width: 100% !important;
+        flex: 1 !important;
+        white-space: normal !important;
+        word-break: normal !important;
+        text-align: left !important;
+        line-height: 1.5;
+    }
+</style>

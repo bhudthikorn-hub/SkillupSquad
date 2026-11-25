@@ -1,0 +1,95 @@
+@{
+    var categoryName = ViewData["SkillName"]?.ToString() ?? "3D & Animation";
+    var description = categoryName switch
+    {
+        "Graphic Design" => "เรียนรู้การออกแบบภาพให้สวย ชัดเจน และสื่อสารได้ตรงกลุ่มเป้าหมาย",
+        "Video Editing" => "ฝึกตัดต่อวิดีโอให้เล่าเรื่องได้ลื่นไหล พร้อมเทคนิคสำหรับงานจริง",
+        "UX/UI" => "ออกแบบประสบการณ์ผู้ใช้และหน้าจอแอปให้ใช้งานง่ายและน่าประทับใจ",
+        "Web Development" => "สร้างเว็บไซต์ตั้งแต่โครงสร้างพื้นฐานจนถึงหน้าเว็บที่ใช้งานได้จริง",
+        "Digital Marketing" => "วางแผนการตลาดดิจิทัล สร้างคอนเทนต์ และวัดผลแคมเปญอย่างเป็นระบบ",
+        "ทักษะอื่นๆ" => "ค้นหาทักษะใหม่ ๆ ที่ช่วยต่อยอดการเรียนและการทำงานของคุณ",
+        _ => "เรียนรู้การสร้างผลงาน 3D ตั้งแต่การขึ้นโมเดล แสง วัสดุ ไปจนถึงการเรนเดอร์"
+    };
+    var skills = categoryName switch
+    {
+        "Graphic Design" => new[] { "Typography", "Color Theory", "Layout", "Branding" },
+        "Video Editing" => new[] { "Storytelling", "Timeline Editing", "Sound Design", "Color Grading" },
+        "UX/UI" => new[] { "User Research", "Wireframing", "Prototyping", "Design System" },
+        "Web Development" => new[] { "HTML & CSS", "JavaScript", "Responsive Design", "API Basics" },
+        "Digital Marketing" => new[] { "Content Planning", "Social Media", "SEO", "Analytics" },
+        _ => new[] { "3D Modeling", "Texturing", "Animation", "Lighting & Render" }
+    };
+    var tools = categoryName switch
+    {
+        "Graphic Design" => new[] { ("Figma", "figma.svg"), ("Photoshop", "photoshop.svg"), ("Illustrator", "illustrator.svg") },
+        "Video Editing" => new[] { ("Premiere Pro", "premierepro.svg"), ("After Effects", "aftereffects.svg"), ("CapCut", "capcut-logo.svg") },
+        "UX/UI" => new[] { ("Figma", "figma.svg"), ("FigJam", "figjam.svg"), ("Notion", "notion.svg") },
+        "Web Development" => new[] { ("VS Code", "vscode.svg"), ("Git", "git.svg"), ("Chrome DevTools", "chrome.svg") },
+        "Digital Marketing" => new[] { ("Analytics", "analytics.svg"), ("Meta Ads", "meta-ads.svg"), ("Canva", "canva.svg") },
+        _ => new[] { ("Blender", "blender.svg"), ("Photoshop", "photoshop.svg"), ("Maya", "autodeskmaya.svg") }
+    };
+    var (level, difficultyPercent, difficultyColor) = categoryName switch
+    {
+        "Graphic Design" or "Digital Marketing" => ("Beginner", 33, "#22c55e"),
+        "UX/UI" or "Video Editing" => ("Intermediate", 66, "#f59e0b"),
+        "Web Development" or "3D & Animation" => ("Advanced", 95, "#ef476f"),
+        _ => ("Beginner", 33, "#22c55e")
+    };
+    var categoryImage = categoryName switch
+    {
+        "Graphic Design" => "Graphic Design2.png",
+        "3D & Animation" => "3D&Animation2.png",
+        "Video Editing" => "Video Editing2.png",
+        "UX/UI" => "UXUI2.png",
+        "Web Development" => "Web Development2.png",
+        "Digital Marketing" => "Digital Marketing2.png",
+        _ => "3D&Animation2.png"
+    };
+}
+<style>
+    .category-framework .difficulty-framework-line { position: relative; height: 8px; margin: 22px 0 10px; border-radius: 999px; background: #e2e8f0; }
+    .category-framework .difficulty-framework-line .difficulty-fill { display: block; height: 100%; border-radius: inherit; }
+    .category-framework .difficulty-framework-line .difficulty-marker { position: absolute; top: 50%; width: 18px; height: 18px; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 2px 6px rgba(15,23,42,.22); transform: translate(-50%, -50%); }
+    .category-framework .level-badge { border-radius: 999px; padding: 6px 12px; color: #166534; background: #dcfce7; font-weight: 700; }
+    .category-framework .difficulty-framework-line[data-level="Intermediate"] + .difficulty-labels + * { color: inherit; }
+    html.dark-theme .category-framework .difficulty-framework-line { background: #334155; }
+    html.dark-theme .category-framework .difficulty-framework-line .difficulty-marker { border-color: #1e293b; }
+    html.dark-theme .category-framework .level-badge { color: #86efac; background: #123522; }
+    html.dark-theme .category-framework .framework-quiz-card,
+    body.dark-mode .category-framework .framework-quiz-card {
+        border: 1px solid #818cf8 !important;
+        background: linear-gradient(135deg, #312e81, #1e293b) !important;
+        color: #f8fafc !important;
+        box-shadow: 0 12px 28px rgba(79, 70, 229, .28);
+    }
+    html.dark-theme .category-framework .framework-quiz-card small,
+    body.dark-mode .category-framework .framework-quiz-card small {
+        color: #c4b5fd !important;
+    }
+    html.dark-theme .category-framework .framework-quiz-card strong,
+    body.dark-mode .category-framework .framework-quiz-card strong {
+        color: #ffffff !important;
+    }
+    html.dark-theme .category-framework .framework-quiz-card:hover,
+    body.dark-mode .category-framework .framework-quiz-card:hover {
+        border-color: #a5b4fc !important;
+        background: linear-gradient(135deg, #4338ca, #263349) !important;
+        transform: translateY(-2px);
+    }
+</style>
+<div class="framework-page category-framework">
+    <div class="framework-breadcrumb">Home / Explore Skills / @categoryName</div>
+    <div class="framework-content-columns">
+        <main class="framework-category-main">
+            <a class="category-back-link" asp-controller="Home" asp-action="PreLearningQuiz" asp-route-skill="@categoryName">← กลับไปแบบทดสอบก่อนเรียน</a>
+            <section class="framework-category-hero">
+                <div class="category-hero-copy"><span class="category-eyebrow">SKILL COURSE</span><h1>@categoryName</h1><p>@description</p><div class="category-hero-meta"><span>5 บทเรียน</span><span>⏱ 1 ชั่วโมง</span></div><div class="category-learning-action">@if (ViewData["LearningCourseId"] is int learningCourseId) { <form asp-controller="Home" asp-action="RemoveFromLearning" method="post" data-remove-course-form data-course-name="@categoryName"> @Html.AntiForgeryToken() <input type="hidden" name="id" value="@learningCourseId" /><button type="submit" class="learning-action-button is-added">✓ อยู่ใน My Learning · ลบออก</button></form> } else { <form asp-controller="Home" asp-action="AddToLearning" method="post"> @Html.AntiForgeryToken() <input type="hidden" name="courseName" value="@categoryName" /><input type="hidden" name="category" value="@categoryName" /><input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" /><button type="submit" class="learning-action-button">＋ เพิ่มใน My Learning</button></form> } <a class="learning-action-button start-learning-button" asp-controller="Home" asp-action="CourseLearning" asp-route-skill="@categoryName">เริ่มเรียน</a></div></div>
+                <div class="framework-placeholder category-placeholder"><img class="category-topic-image" src="@Url.Content("~/" + categoryImage)" alt="รูป @categoryName" /></div>
+            </section>
+            <section class="framework-category-section"><div class="detail-section-heading"><div><span class="detail-kicker">FOUNDATION</span><h2>ทักษะที่ควรมี</h2></div><span class="detail-count">@skills.Length skills</span></div><div class="framework-mini-grid">@foreach (var skill in skills) { <div class="framework-mini-placeholder"><span>@skill</span><small>บทเรียนพื้นฐาน</small></div> }</div></section>
+            <section class="framework-category-section"><div class="detail-section-heading"><div><span class="detail-kicker">TOOLS</span><h2>โปรแกรมที่ใช้</h2></div></div><div class="framework-program-placeholder"><div class="category-tool-list">@foreach (var tool in tools) { <div class="category-tool"><span class="category-tool-icon"><img src="~/images/tools/@tool.Item2" alt="ไอคอน @tool.Item1" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'" /><span class="category-tool-fallback">@tool.Item1.Substring(0, Math.Min(2, tool.Item1.Length))</span></span><strong>@tool.Item1</strong></div> }</div><span>เครื่องมือที่แนะนำสำหรับคอร์สนี้</span></div></section>
+            <section class="framework-category-section difficulty-framework"><div class="detail-section-heading"><div><span class="detail-kicker">YOUR LEVEL</span><h2>ระดับความยาก</h2></div><span class="level-badge" style="color:@(level == "Beginner" ? "#166534" : level == "Intermediate" ? "#92400e" : "#9f1239");background:@(level == "Beginner" ? "#dcfce7" : level == "Intermediate" ? "#fef3c7" : "#fce7f3");">@level</span></div><div class="difficulty-framework-line" data-level="@level"><span class="difficulty-fill" style="width:@difficultyPercent%;background:@difficultyColor;"></span><i class="difficulty-marker" style="left:@difficultyPercent%;background:@difficultyColor;"></i></div><div class="difficulty-labels"><span>Beginner</span><span>Intermediate</span><span>Advanced</span></div></section>
+            <a class="framework-quiz-card" asp-controller="Home" asp-action="PreLearningQuiz" asp-route-skill="@categoryName"><span><small>ทำแบบทดสอบก่อนเรียน</small>Pre-learning Quiz</span><strong>→</strong></a>
+        </main>
+    </div>
+</div>

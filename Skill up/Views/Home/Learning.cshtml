@@ -1,0 +1,92 @@
+@model IReadOnlyList<Skill_up.Models.LearningCourse>
+@{
+    ViewData["Title"] = "My Learning";
+    var completedCourses = Model.Count(course => course.ProgressPercent >= 100);
+    var inProgressCourses = Model.Where(course => course.ProgressPercent < 100).ToList();
+    var completedCourseItems = Model.Where(course => course.ProgressPercent >= 100).ToList();
+}
+
+<div class="framework-page learning-framework">
+    <div class="framework-breadcrumb">Home / My Learning Space</div>
+    <div class="framework-content-columns">
+        <main class="framework-learning-main">
+            <section class="learning-framework-hero"><div class="learning-hero-copy"><small>LEARNING DASHBOARD</small><h1>My Learning Space</h1><p>เรียนต่อจากจุดเดิม และก้าวไปให้ถึงเป้าหมายของคุณ</p></div><div class="learning-stats"><span class="learning-stat-card"><b>@(Model.Count - completedCourses)</b><span>คอร์สที่กำลังเรียน</span></span><span class="learning-stat-card"><b>@completedCourses</b><span>คอร์สที่เรียนแล้ว</span></span></div><div class="learning-hero-image"><img src="@Url.Content("~/My Learning space.png")" asp-append-version="true" alt="My Learning Space" /></div></section>
+            <div class="learning-framework-tabs" role="tablist"><button type="button" class="selected" data-learning-tab="in-progress">In Progress <span>@inProgressCourses.Count</span></button><button type="button" data-learning-tab="completed">Completed <span>@completedCourses</span></button></div>
+            <section class="learning-framework-courses learning-course-panel active" data-learning-panel="in-progress">
+                <div class="learning-section-heading"><div><small>START LEARNING</small><h2>คอร์สที่พร้อมให้เริ่มเรียน</h2></div><a href="/Home/Explore">ดูคอร์สทั้งหมด →</a></div>
+                <div class="learning-framework-course-grid">
+                    @if (inProgressCourses.Count == 0)
+                    {
+                        <div class="learning-empty-state"><strong>ยังไม่มีคอร์สในรายการ</strong><span>เลือกคอร์สที่สนใจจากหน้า Explore แล้วเริ่มเรียนได้เลย</span><a href="/Home/Explore">ค้นหาคอร์ส</a></div>
+                    }
+                    else
+                    {
+                        @foreach (var learningCourse in inProgressCourses)
+                        {
+                            var progress = Math.Clamp(learningCourse.ProgressPercent, 0, 100);
+                            var imageName = learningCourse.Course.Name switch
+                            {
+                                "Graphic Design" => "Graphic Design.jpg",
+                                "3D & Animation" => "3D & Animation.jpg",
+                                "Video Editing" => "Video Editing.jpg",
+                                "UX/UI" => "UX UI.jpg",
+                                "Web Development" => "Web Development.jpg",
+                                "Digital Marketing" => "Digital Marketing.jpg",
+                                _ => string.Empty
+                            };
+                            <article>
+                                @if (!string.IsNullOrEmpty(imageName))
+                                {
+                                    <div class="learning-course-image"><img src="@Url.Content("~/" + imageName)" asp-append-version="true" alt="รูป @learningCourse.Course.Name" loading="lazy" /></div>
+                                }
+                                <div class="learning-course-info">
+                                     <span class="learning-course-label">@(progress >= 100 ? "เรียนจบแล้ว" : progress == 0 ? "ยังไม่ได้เริ่ม" : "กำลังเรียน")</span><h3>@learningCourse.Course.Name</h3><p>เรียนรู้ทักษะ @learningCourse.Course.Category และต่อยอดสู่เป้าหมายของคุณ</p>
+                                     <div class="learning-progress-row"><span>ความคืบหน้า</span><b>@progress%</b></div><div class="learning-progress"><i style="width:@progress% !important; --progress:@progress%"></i></div>
+                                      <div class="learning-course-actions"><a class="start-learning-button" asp-controller="Home" asp-action="CourseLearning" asp-route-skill="@learningCourse.Course.Name">เริ่มเรียน <span>→</span></a><form asp-controller="Home" asp-action="RemoveFromLearning" method="post" data-remove-course-form data-course-name="@learningCourse.Course.Name">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@learningCourse.Id" /><button type="submit" class="remove-learning-button">ลบออก</button></form></div>
+                                </div>
+                            </article>
+                        }
+                    }
+                </div>
+            </section>
+            <section class="learning-framework-courses learning-course-panel" data-learning-panel="completed" hidden>
+                <div class="learning-section-heading"><div><small>YOUR ACHIEVEMENTS</small><h2>คอร์สที่เรียนแล้ว</h2></div><a href="/Home/Explore">ค้นหาคอร์สใหม่ →</a></div>
+                <div class="learning-framework-course-grid">
+                    @if (completedCourseItems.Count == 0)
+                    {
+                        <div class="learning-empty-state"><strong>ยังไม่มีคอร์สที่เรียนจบ</strong><span>เมื่อเรียนจบคอร์ส รายการจะปรากฏที่นี่</span></div>
+                    }
+                    else
+                    {
+                        @foreach (var learningCourse in completedCourseItems)
+                        {
+                            var progress = Math.Clamp(learningCourse.ProgressPercent, 0, 100);
+                            var imageName = learningCourse.Course.Name switch
+                            {
+                                "Graphic Design" => "Graphic Design.jpg",
+                                "3D & Animation" => "3D & Animation.jpg",
+                                "Video Editing" => "Video Editing.jpg",
+                                "UX/UI" => "UX UI.jpg",
+                                "Web Development" => "Web Development.jpg",
+                                "Digital Marketing" => "Digital Marketing.jpg",
+                                _ => string.Empty
+                            };
+                            <article>
+                                @if (!string.IsNullOrEmpty(imageName))
+                                {
+                                    <div class="learning-course-image"><img src="@Url.Content("~/" + imageName)" asp-append-version="true" alt="รูป @learningCourse.Course.Name" loading="lazy" /></div>
+                                }
+                                <div class="learning-course-info">
+                                    <span class="learning-course-label">เรียนจบแล้ว</span><h3>@learningCourse.Course.Name</h3><p>เรียนรู้ทักษะ @learningCourse.Course.Category และต่อยอดสู่เป้าหมายของคุณ</p>
+                                    <div class="learning-progress-row"><span>ความคืบหน้า</span><b>@progress%</b></div><div class="learning-progress"><i style="width:@progress% !important; --progress:@progress%"></i></div>
+                                    <div class="learning-course-actions"><a class="start-learning-button" asp-controller="Home" asp-action="CourseLearning" asp-route-skill="@learningCourse.Course.Name">ทบทวนบทเรียน <span>→</span></a><form asp-controller="Home" asp-action="RemoveFromLearning" method="post" data-remove-course-form data-course-name="@learningCourse.Course.Name">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@learningCourse.Id" /><button type="submit" class="remove-learning-button">ลบออก</button></form></div>
+                                </div>
+                            </article>
+                        }
+                    }
+                </div>
+            </section>
+        </main>
+        <partial name="_UserSidebar" />
+    </div>
+</div>

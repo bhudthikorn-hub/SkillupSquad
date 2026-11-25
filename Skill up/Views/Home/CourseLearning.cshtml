@@ -1,0 +1,134 @@
+@model Skill_up.Models.CourseLearningViewModel
+@{
+    ViewData["Title"] = $"เรียน {Model.CategoryName}";
+    var completedCount = Model.Lessons.Count(lesson => lesson.IsCompleted);
+}
+
+<div class="framework-page course-learning-framework">
+    <div class="framework-breadcrumb"><a asp-controller="Home" asp-action="Learning">My Learning</a> / @Model.CategoryName</div>
+    <div class="framework-content-columns">
+        <main class="course-learning-main">
+            <a class="course-learning-back" asp-controller="Home" asp-action="Category" asp-route-skill="@Model.CategoryName">← กลับหน้าคอร์ส</a>
+            <section class="course-learning-hero">
+                <div class="course-learning-hero-copy">
+                    <span class="course-learning-eyebrow">COURSE LEARNING</span>
+                    <h1>@Model.CategoryName</h1>
+                    <p>@Model.Description</p>
+                    @if (!Model.IsEnrolled)
+                    {
+                        <form asp-controller="Home" asp-action="AddToLearning" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="courseName" value="@Model.CategoryName" />
+                            <input type="hidden" name="category" value="@Model.CategoryName" />
+                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                            <button type="submit" class="course-learning-enroll-button">เพิ่มคอร์สเพื่อเริ่มเรียน</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="course-learning-enrolled">✓ อยู่ใน My Learning</span>
+                    }
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Model.ImageName))
+                {
+                    <div class="course-learning-image"><img src="@Url.Content("~/" + Model.ImageName)" asp-append-version="true" alt="รูป @Model.CategoryName" /></div>
+                }
+            </section>
+
+            <section class="course-learning-progress-card">
+                <div class="course-learning-progress-heading"><div><small>YOUR PROGRESS</small><h2>ความคืบหน้าการเรียน</h2></div><strong>@Model.ProgressPercent%</strong></div>
+                <div class="course-learning-progress-bar"><i style="--progress:@Model.ProgressPercent%"></i></div>
+                <div class="course-learning-progress-meta"><span>เรียนแล้ว @completedCount จาก @Model.Lessons.Count บทเรียน</span><span>@(Model.ProgressPercent >= 100 ? "เรียนจบแล้ว" : "เรียนต่อได้เลย")</span></div>
+            </section>
+
+            <section class="course-learning-lessons">
+                <div class="course-learning-section-heading"><div><small>COURSE CONTENT</small><h2>บทเรียนทั้งหมด</h2></div><span>@Model.Lessons.Count บทเรียน</span></div>
+                <div class="course-learning-lesson-list">
+                    @foreach (var lesson in Model.Lessons)
+                    {
+                        <article class="course-learning-lesson @(lesson.IsCompleted ? "is-completed" : string.Empty)">
+                            <div class="course-learning-lesson-number">@(lesson.IsCompleted ? "✓" : lesson.Number.ToString("00"))</div>
+                            <div class="course-learning-lesson-info"><small>บทเรียนที่ @lesson.Number · @lesson.Duration</small><h3>@lesson.Title</h3><p>@lesson.Description</p></div>
+                            @if (lesson.IsCompleted)
+                            {
+                                <span class="course-learning-completed-label">เรียนจบแล้ว</span>
+                            }
+                            @if (Model.IsEnrolled)
+                            {
+                                <form asp-controller="Home" asp-action="CompleteLesson" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="skill" value="@Model.CategoryName" />
+                                    <input type="hidden" name="lessonNumber" value="@lesson.Number" />
+                                    <button type="button" class="course-learning-lesson-button @(lesson.IsCompleted ? "is-review" : string.Empty)" data-lesson-number="@lesson.Number">@(lesson.IsCompleted ? "ทบทวนบทเรียน" : "เริ่มบทเรียน") <span>→</span></button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="course-learning-locked-label">เพิ่มคอร์สก่อน</span>
+                            }
+                        </article>
+                    }
+                </div>
+            </section>
+
+            <section class="post-course-quiz-card">
+                <div class="course-learning-section-heading">
+                    <div><small>FINAL QUIZ</small><h2>Quiz หลังเรียนจบ</h2></div>
+                    <span>10 ข้อ</span>
+                </div>
+                <p class="post-course-quiz-intro">ทบทวนเนื้อหารวมจากทั้ง 5 บทเรียนในคอร์ส @Model.CategoryName แล้วตรวจคะแนนได้ทันที</p>
+                @if (!Model.IsEnrolled)
+                {
+                    <p class="post-course-quiz-locked">เพิ่มคอร์สใน My Learning ก่อนทำแบบทดสอบ</p>
+                }
+                else
+                {
+                    <a class="post-course-quiz-link" asp-controller="Home" asp-action="PostCourseQuiz" asp-route-category="@Model.CategoryName">เริ่มทำ Quiz <span>→</span></a>
+                }
+            </section>
+        </main>
+    </div>
+</div>
+
+<dialog class="learning-mode-dialog" data-learning-mode-dialog>
+    <div class="learning-mode-dialog-content">
+        <button type="button" class="learning-mode-close" data-learning-mode-close aria-label="ปิด">×</button>
+        <small>เลือกวิธีการเรียน</small>
+        <h2 data-learning-mode-title>เริ่มบทเรียน</h2>
+        <p>เลือกวิธีที่เหมาะกับคุณ แล้วเริ่มเรียนบทนี้ได้เลย</p>
+        <div class="learning-mode-options">
+            <a asp-controller="Home" asp-action="LessonContent" asp-route-skill="@Model.CategoryName" asp-route-lessonNumber="" asp-route-mode="read" data-learning-mode-link="read"><span>📖</span><b>อ่าน</b><small>เรียนรู้จากบทความและสรุปเนื้อหา</small></a>
+            <a asp-controller="Home" asp-action="LessonContent" asp-route-skill="@Model.CategoryName" asp-route-lessonNumber="" asp-route-mode="listen" data-learning-mode-link="listen"><span>🎧</span><b>ฟัง</b><small>เรียนรู้ผ่านเสียงบรรยาย</small></a>
+            <a asp-controller="Home" asp-action="LessonContent" asp-route-skill="@Model.CategoryName" asp-route-lessonNumber="" asp-route-mode="watch" data-learning-mode-link="watch"><span>▶</span><b>ดู</b><small>เรียนรู้ผ่านวิดีโอและตัวอย่าง</small></a>
+            <a asp-controller="Home" asp-action="LessonContent" asp-route-skill="@Model.CategoryName" asp-route-lessonNumber="" asp-route-mode="practice" data-learning-mode-link="practice"><span>✦</span><b>ฝึกทำ</b><small>ลงมือทำแบบฝึกหัดจากบทเรียน</small></a>
+        </div>
+    </div>
+</dialog>
+
+@section Scripts {
+    <script>
+        const learningModeDialog = document.querySelector('[data-learning-mode-dialog]');
+        const learningModeTitle = learningModeDialog?.querySelector('[data-learning-mode-title]');
+        const learningModeLinks = learningModeDialog?.querySelectorAll('[data-learning-mode-link]');
+
+        document.querySelectorAll('[data-lesson-number]').forEach(button => {
+            button.addEventListener('click', () => {
+                const lessonNumber = button.dataset.lessonNumber;
+                learningModeTitle.textContent = `เริ่มบทเรียนที่ ${lessonNumber}`;
+                learningModeLinks?.forEach(link => {
+                    const linkUrl = new URL(link.href, window.location.origin);
+                    linkUrl.searchParams.set('lessonNumber', lessonNumber);
+                    link.href = linkUrl.toString();
+                });
+                learningModeDialog.showModal();
+            });
+        });
+
+        learningModeDialog?.querySelector('[data-learning-mode-close]')?.addEventListener('click', () => learningModeDialog.close());
+        learningModeDialog?.addEventListener('click', event => {
+            if (event.target === learningModeDialog) {
+                learningModeDialog.close();
+            }
+        });
+    </script>
+}

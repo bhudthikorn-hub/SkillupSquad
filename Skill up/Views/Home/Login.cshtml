@@ -1,0 +1,15 @@
+@model Skill_up.Controllers.AccountController.LoginRequest
+@{
+    ViewData["Title"] = "เข้าสู่ระบบ";
+    ViewData["HideThemeToggle"] = true;
+    ViewData["HideTopbar"] = true;
+    Layout = "_Layout";
+}
+
+<div class="login-page auth-page">
+    <div class="login-brand">SkillUp</div>
+    <div class="login-card">
+        <section class="login-welcome"><div class="login-art auth-art"><img src="~/login.png" asp-append-version="true" alt="SkillUp learning illustration" /></div><h1>Welcome Back to SkillUp!</h1><p>Continue your journey to new career paths.</p></section>
+        <section class="login-form-panel"><h2>เข้าสู่ระบบ</h2><p class="login-subtitle">กลับมาเรียนรู้และเติบโตไปด้วยกัน</p><form asp-controller="Account" asp-action="Login" method="post"><input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" /><label>Email Address<input asp-for="Email" type="email" placeholder="✉  e.g., yourname@email.com" /></label><label>Password<div class="password-field"><input asp-for="Password" type="password" placeholder="••••••••••" /><button type="button" aria-label="แสดงรหัสผ่าน">◉</button></div></label><label class="remember-login"><span class="remember-checkbox"><input asp-for="RememberMe" type="checkbox" /><span class="remember-checkmark" aria-hidden="true"></span></span> Remember me</label><a class="forgot" asp-controller="Account" asp-action="ForgotPassword">Forgot Password?</a><div asp-validation-summary="ModelOnly" class="login-error"></div><button type="submit" class="button submit-button">Sign In&nbsp; →</button></form><p class="signup-prompt">Don't have an account? <a asp-controller="Account" asp-action="Register">Sign Up.</a></p></section>
+    </div>
+</div>

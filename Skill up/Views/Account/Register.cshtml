@@ -1,0 +1,47 @@
+@model Skill_up.Controllers.AccountController.RegisterRequest
+@{
+    ViewData["Title"] = "สมัครสมาชิก";
+    ViewData["HideThemeToggle"] = true;
+    ViewData["HideTopbar"] = true;
+    Layout = "_Layout";
+}
+
+<div class="login-page auth-page">
+    <div class="login-brand">SkillUp</div>
+    <div class="login-card">
+        <section class="login-welcome">
+            <div class="login-art auth-art"><img src="~/login.png" asp-append-version="true" alt="SkillUp learning illustration" /></div>
+            <h1>Start Your SkillUp Journey!</h1>
+            <p>สร้างบัญชีเพื่อเริ่มเรียนรู้ทักษะใหม่</p>
+        </section>
+        <section class="login-form-panel">
+            <h2>สมัครสมาชิก</h2>
+            <p class="login-subtitle">กรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้</p>
+            <form asp-controller="Account" asp-action="Register" method="post">
+                <div asp-validation-summary="ModelOnly" class="login-error"></div>
+                <label>ชื่อที่แสดง
+                    <input asp-for="DisplayName" placeholder="ชื่อของคุณ" />
+                </label>
+                <span asp-validation-for="DisplayName" class="login-error"></span>
+                <label>Email Address
+                    <input asp-for="Email" type="email" placeholder="yourname@email.com" />
+                </label>
+                <span asp-validation-for="Email" class="login-error"></span>
+                <label>Password
+                    <input asp-for="Password" type="password" placeholder="อย่างน้อย 8 ตัวอักษร" />
+                </label>
+                <span asp-validation-for="Password" class="login-error"></span>
+                <label>ยืนยัน Password
+                    <input asp-for="ConfirmPassword" type="password" placeholder="กรอกรหัสผ่านอีกครั้ง" />
+                </label>
+                <span asp-validation-for="ConfirmPassword" class="login-error"></span>
+                <button type="submit" class="button submit-button">Sign Up&nbsp; →</button>
+            </form>
+            <p class="signup-prompt">มีบัญชีอยู่แล้ว? <a asp-controller="Account" asp-action="Login">เข้าสู่ระบบ</a></p>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

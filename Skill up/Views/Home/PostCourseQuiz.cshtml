@@ -1,0 +1,69 @@
+@model Skill_up.Models.PostCourseQuizViewModel
+@{
+    ViewData["Title"] = $"Quiz หลังเรียนจบ - {Model.CategoryName}";
+}
+
+<div class="quiz-framework post-course-quiz-page">
+    <div class="quiz-shell">
+        <a class="quiz-back" asp-controller="Home" asp-action="CourseLearning" asp-route-skill="@Model.CategoryName">← กลับหน้าบทเรียน</a>
+        <div class="quiz-heading">
+            <span>FINAL QUIZ</span>
+            <h1>Quiz หลังเรียนจบ</h1>
+            <p>ทบทวนเนื้อหารวมจากทั้ง 5 บทเรียนในคอร์ส @Model.CategoryName จำนวน 10 ข้อ</p>
+        </div>
+
+        @if (Model.IsChecked)
+        {
+            var totalQuestions = Model.Questions.Count;
+            var scorePercent = totalQuestions == 0 ? 0 : (int)Math.Round(Model.Score * 100d / totalQuestions);
+            <section class="post-course-quiz-result" aria-live="polite">
+                <div class="post-course-quiz-result-icon">✓</div>
+                <div class="post-course-quiz-result-copy">
+                    <span>สรุปผลการทำแบบทดสอบ</span>
+                    <h2>ทำได้ดีมาก!</h2>
+                    <p>คุณตอบถูก <b>@Model.Score</b> จาก @totalQuestions ข้อ</p>
+                </div>
+                <div class="post-course-quiz-score">
+                    <strong>@Model.Score<span>/@totalQuestions</span></strong>
+                    <small>@scorePercent%</small>
+                </div>
+            </section>
+        }
+
+        <div class="post-course-quiz-summary">
+            <div class="post-course-quiz-summary-icon">✦</div>
+            <div>
+                <strong>พร้อมทดสอบความรู้แล้วหรือยัง?</strong>
+                <span>เลือกคำตอบที่ดีที่สุดในแต่ละข้อ</span>
+            </div>
+            <div class="post-course-quiz-count"><b>@Model.Questions.Count</b><span>ข้อ</span></div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="post-course-quiz-error">@Model.ErrorMessage</div>
+        }
+
+        <form asp-controller="Home" asp-action="CheckPostCourseQuiz" method="post" class="post-course-quiz-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="category" value="@Model.CategoryName" />
+            @for (var index = 0; index < Model.Questions.Count; index++)
+            {
+                var question = Model.Questions[index];
+                <div class="post-course-quiz-question">
+                    <h4>@(index + 1). @question.Question</h4>
+                    <div class="post-course-quiz-options">
+                        @for (var optionIndex = 0; optionIndex < question.Options.Count; optionIndex++)
+                        {
+                            <label>
+                                <input type="radio" name="answers[@index]" value="@optionIndex" required />
+                                <span>@question.Options[optionIndex]</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+            }
+            <button type="submit" class="post-course-quiz-submit" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });"><span>ตรวจคำตอบ</span><span aria-hidden="true">→</span></button>
+        </form>
+    </div>
+</div>

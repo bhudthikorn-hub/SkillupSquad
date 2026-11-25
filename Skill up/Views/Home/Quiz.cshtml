@@ -1,0 +1,53 @@
+@{
+    ViewData["Title"] = "Skill Quiz";
+}
+
+<div class="quiz-framework">
+    <div class="quiz-shell">
+        <a class="quiz-back" asp-controller="Home" asp-action="Index">← กลับหน้า Home</a>
+        <div class="quiz-heading">
+            <span>SKILL DISCOVERY</span>
+            <h1>ค้นหาทักษะที่เหมาะกับคุณ</h1>
+            <p>ตอบคำถามสั้น ๆ แล้วเราจะช่วยค้นหาแนวทางการเรียนที่เหมาะกับคุณ</p>
+        </div>
+
+        <div class="quiz-progress"><i></i></div>
+        <section class="quiz-card" data-quiz-card>
+            <div class="quiz-question-count">คำถาม <b data-quiz-current>1</b> / <span data-quiz-total>5</span></div>
+            <h2 data-quiz-question>คุณสนใจทำงานแบบไหนมากที่สุด?</h2>
+            <div class="quiz-options" data-quiz-options></div>
+            <button type="button" class="quiz-next" data-quiz-next disabled>ถัดไป <span>→</span></button>
+        </section>
+        <section class="quiz-result" data-quiz-result hidden>
+            <span class="quiz-result-icon">✦</span>
+            <small>ทักษะที่เหมาะกับคุณ</small>
+            <h2 data-quiz-result-title></h2>
+            <p data-quiz-result-description></p>
+            <a class="quiz-result-link" data-quiz-result-link>ดูรายละเอียดทักษะ <span>→</span></a>
+            <button type="button" class="quiz-retry" data-quiz-retry>ทำแบบทดสอบอีกครั้ง</button>
+        </section>
+    </div>
+</div>
+
+<style>
+    body.dark-mode .quiz-framework .quiz-option:hover,
+    html.dark-theme .quiz-framework .quiz-option:hover {
+        border-color: #64748b !important;
+        background: #263349 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .quiz-framework .quiz-option.selected,
+    html.dark-theme .quiz-framework .quiz-option.selected {
+        border: 2px solid #818cf8 !important;
+        background: rgba(99, 102, 241, .25) !important;
+        color: #fff !important;
+    }
+
+    body.dark-mode .quiz-framework .quiz-option.selected > span,
+    html.dark-theme .quiz-framework .quiz-option.selected > span {
+        border-color: #6366f1 !important;
+        background: #6366f1 !important;
+        color: #fff !important;
+    }
+</style>

@@ -1,0 +1,111 @@
+@using Microsoft.EntityFrameworkCore
+@inject UserManager<ApplicationUser> UserManager
+@inject Skill_up.Data.ApplicationDbContext DbContext
+@{
+    var currentUser = User.Identity?.IsAuthenticated == true
+        ? await UserManager.GetUserAsync(User)
+        : null;
+    var displayName = currentUser?.DisplayName?.Trim();
+    if (string.IsNullOrWhiteSpace(displayName))
+    {
+        displayName = currentUser?.UserName ?? "ผู้เรียน";
+    }
+    var avatarLetter = displayName.Trim()[0].ToString().ToUpperInvariant();
+    var learningCourses = currentUser is null
+        ? new List<Skill_up.Models.LearningCourse>()
+        : await DbContext.LearningCourses
+            .AsNoTracking()
+            .Include(item => item.Course)
+            .Where(item => item.UserId == currentUser.Id && item.Course.IsActive)
+            .OrderByDescending(item => item.AddedAtUtc)
+            .ToListAsync();
+    var learnedSkills = learningCourses
+        .Select(item => item.Course.Category)
+        .Where(category => !string.IsNullOrWhiteSpace(category))
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToList();
+    var overallProgress = learningCourses.Count == 0
+        ? 0
+        : (int)Math.Round(learningCourses.Average(item => Math.Clamp(item.ProgressPercent, 0, 100)));
+    var completedCourses = learningCourses.Count(item => item.ProgressPercent >= 100);
+}
+
+<aside class="shared-user-sidebar explore-sidebar">
+    @if (currentUser is null)
+    {
+        <section class="explore-sidebar-card shared-guest-card">
+            <span class="shared-guest-icon">◎</span>
+            <h2>เริ่มต้นการเรียนรู้</h2>
+            <p>เข้าสู่ระบบเพื่อดูโปรไฟล์ เป้าหมาย และความคืบหน้าของคุณ</p>
+            <div class="shared-guest-actions">
+                <a asp-controller="Home" asp-action="Login">เข้าสู่ระบบ</a>
+                <a asp-controller="Account" asp-action="Register">สมัครสมาชิก</a>
+            </div>
+        </section>
+        <section class="explore-sidebar-card shared-empty-card">
+            <h2>เป้าหมายของฉัน</h2>
+            <span>ยังไม่มีข้อมูลเป้าหมาย</span>
+        </section>
+        <section class="explore-sidebar-card shared-empty-card">
+            <h2>ทักษะและคอร์สของฉัน</h2>
+            <span>เข้าสู่ระบบเพื่อเริ่มบันทึกการเรียน</span>
+        </section>
+    }
+    else
+    {
+        <section class="explore-sidebar-card explore-profile-card">
+            <div class="summary-user">
+                <span class="explore-avatar">@avatarLetter</span>
+                <div><b>@displayName</b><small>ผู้เรียน SkillUp</small></div>
+                <a asp-controller="Home" asp-action="Profile" aria-label="ดูโปรไฟล์">→</a>
+            </div>
+        </section>
+        <section class="explore-sidebar-card">
+            <div class="explore-card-heading"><h2>ความก้าวหน้าของฉัน</h2><a asp-controller="Home" asp-action="Profile">ดูโปรไฟล์</a></div>
+            <p class="explore-sidebar-muted">ความคืบหน้าจากคอร์สที่กำลังเรียน</p>
+            <div class="explore-progress"><i style="--progress:@overallProgress%"></i></div>
+            <small>@overallProgress% · @completedCourses/@learningCourses.Count คอร์สที่เรียนจบแล้ว</small>
+        </section>
+        <section class="explore-sidebar-card">
+            <div class="explore-card-heading"><h2>ทักษะที่คุณมี</h2><a asp-controller="Home" asp-action="Learning">ดูทั้งหมด</a></div>
+            @if (learnedSkills.Count == 0)
+            {
+                <span class="shared-sidebar-empty-text">ยังไม่มีทักษะจากคอร์สที่เลือกเรียน</span>
+            }
+            else
+            {
+                <div class="explore-skill-chips">@foreach (var skill in learnedSkills) { <span>@skill</span> }</div>
+            }
+        </section>
+        <section class="explore-sidebar-card">
+            <div class="explore-card-heading"><h2>คอร์สที่กำลังเรียน</h2><a asp-controller="Home" asp-action="Learning">ดูทั้งหมด</a></div>
+            @if (learningCourses.Count == 0)
+            {
+                <span class="shared-sidebar-empty-text">ยังไม่มีคอร์สที่กำลังเรียน</span>
+            }
+            else
+            {
+                foreach (var learningCourse in learningCourses.Take(3))
+                {
+                    var imageName = learningCourse.Course.Name switch
+                    {
+                        "Graphic Design" => "Graphic Design2.png",
+                        "3D & Animation" => "3D&Animation2.png",
+                        "Video Editing" => "Video Editing2.png",
+                        "UX/UI" => "UXUI2.png",
+                        "Web Development" => "Web Development2.png",
+                        "Digital Marketing" => "Digital Marketing2.png",
+                        _ => learningCourse.Course.Name + "2.png"
+                    };
+                    <div class="explore-learning-card"><span class="explore-course-thumb"><img src="@Url.Content("~/" + imageName)" alt="@learningCourse.Course.Name" onerror="this.style.display='none'" /></span><div><b>@learningCourse.Course.Name</b><small>@(learningCourse.ProgressPercent == 0 ? "ยังไม่ได้เริ่มเรียน" : learningCourse.ProgressPercent >= 100 ? "เรียนจบแล้ว" : "กำลังเรียน") · @learningCourse.ProgressPercent%</small><div class="explore-progress"><i style="--progress:@Math.Clamp(learningCourse.ProgressPercent, 0, 100)%"></i></div></div><form asp-controller="Home" asp-action="RemoveFromLearning" method="post" data-remove-course-form data-course-name="@learningCourse.Course.Name">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@learningCourse.Id" /><button type="submit" class="explore-remove-button" aria-label="ลบ @learningCourse.Course.Name ออกจากคอร์สที่กำลังเรียน">×</button></form></div>
+                }
+            }
+        </section>
+        <section class="explore-sidebar-card explore-recommendations">
+            <div class="explore-card-heading"><h2>แนะนำสำหรับคุณ</h2></div>
+            <a href="#"><span>✦</span><div><b>เริ่มวางแผนเป็น 3D Artist</b><small>เส้นทางการเรียนรู้ที่แนะนำ</small></div><strong>›</strong></a>
+            <a href="#"><span>▣</span><div><b>รวมคอร์สจาก Coursera</b><small>คอร์สยอดนิยมสำหรับคุณ</small></div><strong>›</strong></a>
+            <a href="#"><span>◇</span><div><b>เทคนิคสร้างพอร์ตโฟลิโอ</b><small>เตรียมพร้อมสู่การทำงาน</small></div><strong>›</strong></a>
+        </section>
+    }
+</aside>

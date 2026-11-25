@@ -1,0 +1,490 @@
+@model Skill_up.Models.LessonContentViewModel
+@{
+    ViewData["Title"] = $"{Model.ModeLabel} - {Model.LessonTitle}";
+}
+
+<div class="framework-page lesson-content-framework">
+    <div class="framework-breadcrumb"><a asp-controller="Home" asp-action="CourseLearning" asp-route-skill="@Model.CategoryName">@Model.CategoryName</a> / บทเรียนที่ @Model.LessonNumber</div>
+    <main class="lesson-content-main">
+        <a class="lesson-content-back" asp-controller="Home" asp-action="CourseLearning" asp-route-skill="@Model.CategoryName">← กลับรายการบทเรียน</a>
+        <nav class="lesson-mode-switcher" aria-label="เลือกวิธีเรียน">
+            @foreach (var mode in new[] { (Key: "read", Label: "อ่าน", Icon: "📖"), (Key: "listen", Label: "ฟัง", Icon: "🎧"), (Key: "watch", Label: "ดู", Icon: "▶"), (Key: "practice", Label: "ฝึกทำ", Icon: "✦") })
+            {
+                var isActive = Model.Mode == mode.Key;
+                <a class="@(isActive ? "is-active" : string.Empty)" asp-controller="Home" asp-action="LessonContent" asp-route-skill="@Model.CategoryName" asp-route-lessonNumber="@Model.LessonNumber" asp-route-mode="@mode.Key" aria-current="@(isActive ? "page" : null)"><span>@mode.Icon</span><b>@mode.Label</b></a>
+            }
+        </nav>
+        <section class="lesson-content-header">
+            <div>
+                <span class="lesson-content-eyebrow">LESSON @Model.LessonNumber · @Model.ModeLabel.ToUpperInvariant()</span>
+                <h1>@Model.LessonTitle</h1>
+                <p>@Model.LessonDescription</p>
+            </div>
+            <div class="lesson-content-mode-icon">@(Model.Mode switch { "listen" => "🎧", "watch" => "▶", "practice" => "✦", _ => "📖" })</div>
+        </section>
+
+        @if (Model.Mode is "listen" or "watch")
+        {
+            <section class="lesson-media-placeholder">
+                @if (Model.Mode == "watch" && !string.IsNullOrWhiteSpace(Model.MediaUrl))
+                {
+                    <div class="lesson-video-frame"><iframe src="@Model.MediaUrl" title="@Model.ContentTitle" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+                }
+                else if (Model.Mode == "listen" && !string.IsNullOrWhiteSpace(Model.AudioUrl))
+                {
+                    <div class="lesson-audio-player">
+                        <div class="lesson-media-icon">🎧</div>
+                        <h2>@Model.ContentTitle</h2>
+                        <p>@Model.LearningModeNotice</p>
+                        <audio controls preload="metadata">
+                            <source src="@Url.Content(Model.AudioUrl)" type="audio/mpeg" />
+                            เบราว์เซอร์ของคุณไม่รองรับการเล่นไฟล์เสียง
+                        </audio>
+                    </div>
+                }
+                else
+                {
+                    <div class="lesson-media-icon">@(Model.Mode == "listen" ? "🎧" : "▶")</div>
+                    <h2>@Model.ContentTitle</h2>
+                    <p>@Model.LearningModeNotice</p>
+                    <div class="lesson-media-progress"><i></i></div>
+                    <span>สื่อการเรียนรู้ · @Model.ModeLabel</span>
+                }
+            </section>
+        }
+        else
+        {
+            <section class="lesson-content-card">
+                <div class="lesson-content-card-heading"><span>@(Model.Mode == "practice" ? "PRACTICE" : "READING")</span><h2>@Model.ContentTitle</h2></div>
+                <div class="lesson-content-copy">@Html.Raw(Model.Content)</div>
+            </section>
+        }
+
+        @if (Model.Mode == "practice")
+        {
+            <section class="lesson-practice-card">
+                <span>CHECK YOUR UNDERSTANDING</span>
+                <section id="practice-score-card" class="lesson-practice-score-card" aria-live="polite" style="@(Model.PracticeChecked ? "display:grid;" : "display:none;")">
+                    <div class="lesson-practice-score-heading">
+                        <div>
+                            <small>YOUR PRACTICE RESULT</small>
+                            <h2>สรุปผลคะแนน</h2>
+                        </div>
+                        <strong><b data-practice-score>@Model.PracticeScore</b><span> / @Model.PracticeTotal คะแนน</span></strong>
+                    </div>
+                    <div class="lesson-practice-score-track"><i data-practice-progress style="width:@(Model.PracticeTotal == 0 ? 0 : Model.PracticeScore * 100 / Model.PracticeTotal)%"></i></div>
+                    <p class="lesson-practice-score-status" data-practice-status>@(Model.PracticeTotal > 0 && Model.PracticeScore >= Math.Ceiling(Model.PracticeTotal * .6) ? "ผ่านแล้ว เยี่ยมมาก!" : "ลองทบทวนอีกครั้งแล้วทำใหม่ได้เลย")</p>
+                </section>
+                <form id="practice-form" data-correct-answers="@string.Join(",", Model.PracticeQuestions.Select(question => question.CorrectOptionIndex))" asp-controller="Home" asp-action="CheckPractice" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="skill" value="@Model.CategoryName" />
+                <input type="hidden" name="lessonNumber" value="@Model.LessonNumber" />
+                <div id="practice-question-list">
+                    @for (var questionIndex = 0; questionIndex < Model.PracticeQuestions.Count; questionIndex++)
+                    {
+                        var question = Model.PracticeQuestions[questionIndex];
+                        <div class="practice-question-item">
+                            <h2>@(questionIndex + 1). @question.Question</h2>
+                            <div class="lesson-practice-options">
+                            @for (var optionIndex = 0; optionIndex < question.Options.Count; optionIndex++)
+                            {
+                                var option = question.Options[optionIndex];
+                                <label><input type="radio" name="answers[@questionIndex]" value="@optionIndex" required /> <span>@option</span></label>
+                            }
+                            </div>
+                        </div>
+                    }
+                </div>
+                <button type="submit" class="lesson-complete-button">ตรวจคำตอบ</button>
+                </form>
+            </section>
+        }
+
+        <section class="lesson-content-actions">
+            <form asp-controller="Home" asp-action="CompleteLesson" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="skill" value="@Model.CategoryName" />
+                <input type="hidden" name="lessonNumber" value="@Model.LessonNumber" />
+                <input type="hidden" name="learningMode" value="@Model.Mode" />
+                @if (Model.Mode == "practice")
+                {
+                    <input type="hidden" name="practiceChecked" value="@Model.PracticeChecked.ToString().ToLowerInvariant()" />
+                }
+                @if (Model.Mode != "practice" || Model.PracticeChecked)
+                {
+                    <button type="submit" class="lesson-complete-button">เรียนบทนี้จบแล้ว <span>→</span></button>
+                }
+                else
+                {
+                    <button type="button" class="lesson-complete-button" disabled>ตรวจคำตอบก่อนจบบท</button>
+                }
+            </form>
+        </section>
+    </main>
+</div>
+
+<style>
+    html.dark-theme .lesson-content-framework,
+    body.dark-mode .lesson-content-framework {
+        background: #0f172a !important;
+        color: #f8fafc;
+    }
+
+    html.dark-theme .lesson-content-framework .framework-breadcrumb,
+    body.dark-mode .lesson-content-framework .framework-breadcrumb,
+    html.dark-theme .lesson-content-framework .lesson-content-back,
+    body.dark-mode .lesson-content-framework .lesson-content-back {
+        color: #cbd5e1 !important;
+    }
+
+    html.dark-theme .lesson-mode-switcher,
+    body.dark-mode .lesson-mode-switcher {
+        border-color: #334155 !important;
+        background: #1e293b !important;
+    }
+
+    html.dark-theme .lesson-mode-switcher a,
+    body.dark-mode .lesson-mode-switcher a {
+        color: #cbd5e1 !important;
+    }
+
+    html.dark-theme .lesson-mode-switcher a:hover,
+    body.dark-mode .lesson-mode-switcher a:hover {
+        background: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    html.dark-theme .lesson-mode-switcher a.is-active,
+    body.dark-mode .lesson-mode-switcher a.is-active {
+        background: #4338ca !important;
+        color: #f8fafc !important;
+    }
+
+    html.dark-theme .lesson-content-header,
+    body.dark-mode .lesson-content-header {
+        border-color: #334155 !important;
+        background: linear-gradient(135deg, #1e1b4b, #1e293b) !important;
+        color: #f8fafc;
+    }
+
+    html.dark-theme .lesson-content-header h1,
+    body.dark-mode .lesson-content-header h1,
+    html.dark-theme .lesson-content-header p,
+    body.dark-mode .lesson-content-header p {
+        color: #f8fafc !important;
+    }
+
+    html.dark-theme .lesson-content-header p,
+    body.dark-mode .lesson-content-header p {
+        color: #cbd5e1 !important;
+    }
+
+    html.dark-theme .lesson-content-eyebrow,
+    body.dark-mode .lesson-content-eyebrow {
+        color: #c4b5fd !important;
+    }
+
+    html.dark-theme .lesson-content-card,
+    body.dark-mode .lesson-content-card,
+    html.dark-theme .lesson-media-placeholder,
+    body.dark-mode .lesson-media-placeholder,
+    html.dark-theme .lesson-practice-card,
+    body.dark-mode .lesson-practice-card,
+    html.dark-theme .lesson-content-actions,
+    body.dark-mode .lesson-content-actions {
+        border: 1px solid #334155 !important;
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        box-shadow: 0 10px 24px rgba(2, 6, 23, .28);
+    }
+
+    html.dark-theme .lesson-content-card-heading h2,
+    body.dark-mode .lesson-content-card-heading h2,
+    html.dark-theme .lesson-media-placeholder h2,
+    body.dark-mode .lesson-media-placeholder h2,
+    html.dark-theme .lesson-practice-card h2,
+    body.dark-mode .lesson-practice-card h2,
+    html.dark-theme .lesson-content-copy,
+    body.dark-mode .lesson-content-copy,
+    html.dark-theme .lesson-content-copy h1,
+    body.dark-mode .lesson-content-copy h1,
+    html.dark-theme .lesson-content-copy h2,
+    body.dark-mode .lesson-content-copy h2,
+    html.dark-theme .lesson-content-copy h3,
+    body.dark-mode .lesson-content-copy h3,
+    html.dark-theme .lesson-content-copy h4,
+    body.dark-mode .lesson-content-copy h4,
+    html.dark-theme .lesson-content-copy li,
+    body.dark-mode .lesson-content-copy li,
+    html.dark-theme .lesson-content-copy strong,
+    body.dark-mode .lesson-content-copy strong {
+        color: #f8fafc !important;
+    }
+
+    html.dark-theme .lesson-content-card-heading > span,
+    body.dark-mode .lesson-content-card-heading > span,
+    html.dark-theme .lesson-practice-card > span,
+    body.dark-mode .lesson-practice-card > span,
+    html.dark-theme .lesson-media-placeholder p,
+    body.dark-mode .lesson-media-placeholder p,
+    html.dark-theme .lesson-media-placeholder > span,
+    body.dark-mode .lesson-media-placeholder > span,
+    html.dark-theme .lesson-content-copy p,
+    body.dark-mode .lesson-content-copy p,
+    html.dark-theme .lesson-content-copy blockquote,
+    body.dark-mode .lesson-content-copy blockquote {
+        color: #e2e8f0 !important;
+    }
+
+    html.dark-theme .lesson-practice-options label,
+    body.dark-mode .lesson-practice-options label {
+        border-color: #475569 !important;
+        background: #263349 !important;
+        color: #f8fafc !important;
+    }
+
+    html.dark-theme .lesson-practice-options label:hover,
+    body.dark-mode .lesson-practice-options label:hover {
+        border-color: #818cf8 !important;
+        background: #334155 !important;
+    }
+
+    html.dark-theme .lesson-content-copy a,
+    body.dark-mode .lesson-content-copy a {
+        color: #a5b4fc !important;
+    }
+
+    html.dark-theme .lesson-content-copy code,
+    body.dark-mode .lesson-content-copy code,
+    html.dark-theme .lesson-content-copy pre,
+    body.dark-mode .lesson-content-copy pre {
+        border-color: #475569 !important;
+        background: #0f172a !important;
+        color: #e2e8f0 !important;
+    }
+
+    .lesson-practice-score-card {
+        display: grid;
+        gap: 12px;
+        margin: 18px 0 24px;
+        padding: 24px;
+        border: 1px solid #c7d2fe;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #eef2ff, #ecfeff);
+        color: #172554;
+        box-shadow: 0 12px 26px rgba(67, 56, 202, .12);
+    }
+
+    .lesson-practice-score-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .lesson-practice-score-heading small {
+        color: #6366f1;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    .lesson-practice-score-heading h2 {
+        margin: 4px 0 0;
+        color: #172554;
+        font-size: 21px;
+    }
+
+    .lesson-practice-score-heading > strong {
+        color: #4338ca;
+        font-size: 16px;
+        white-space: nowrap;
+    }
+
+    .lesson-practice-score-heading > strong b {
+        font-size: 42px;
+        line-height: 1;
+    }
+
+    .lesson-practice-score-heading > strong span {
+        color: #64748b;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .lesson-practice-score-track {
+        height: 12px;
+        overflow: hidden;
+        border-radius: 99px;
+        background: #dbeafe;
+    }
+
+    .lesson-practice-score-track i {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #6366f1, #14b8a6);
+        transition: width .45s ease;
+    }
+
+    .lesson-practice-score-status {
+        margin: 0;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    html.dark-theme .lesson-practice-score-card,
+    body.dark-mode .lesson-practice-score-card {
+        border-color: #334155 !important;
+        background: linear-gradient(135deg, #1e1b4b, #1e293b) !important;
+        color: #f8fafc !important;
+        box-shadow: 0 12px 28px rgba(2, 6, 23, .35);
+    }
+
+    html.dark-theme .lesson-practice-score-heading h2,
+    body.dark-mode .lesson-practice-score-heading h2,
+    html.dark-theme .lesson-practice-score-heading > strong,
+    body.dark-mode .lesson-practice-score-heading > strong {
+        color: #f8fafc !important;
+    }
+
+    html.dark-theme .lesson-practice-score-heading small,
+    body.dark-mode .lesson-practice-score-heading small {
+        color: #c4b5fd !important;
+    }
+
+    html.dark-theme .lesson-practice-score-heading > strong span,
+    body.dark-mode .lesson-practice-score-heading > strong span,
+    html.dark-theme .lesson-practice-score-status,
+    body.dark-mode .lesson-practice-score-status {
+        color: #cbd5e1 !important;
+    }
+
+    html.dark-theme .lesson-practice-score-track,
+    body.dark-mode .lesson-practice-score-track {
+        background: #334155;
+    }
+
+</style>
+
+<script>
+    (() => {
+        const practiceForm = document.querySelector('#practice-form');
+        const questionList = document.querySelector('#practice-question-list');
+        const skill = practiceForm?.querySelector('input[name="skill"]')?.value;
+        const lessonNumber = Number(practiceForm?.querySelector('input[name="lessonNumber"]')?.value);
+        if (practiceForm && questionList) {
+            const questionBank = {
+                'Web Development': [
+                    ['HTML Structure', ['semantic elements', 'heading hierarchy', 'accessible forms', 'document outline', 'metadata']],
+                    ['CSS Layout', ['Flexbox', 'Grid', 'responsive breakpoints', 'box model', 'positioning']],
+                    ['JavaScript Fundamentals', ['variables and scope', 'functions', 'arrays', 'objects', 'events']],
+                    ['Frontend and APIs', ['HTTP methods', 'JSON', 'fetch', 'status codes', 'API endpoints']],
+                    ['Web Security and Deployment', ['HTTPS', 'authentication', 'input validation', 'environment variables', 'DNS']],
+                ],
+                'Graphic Design': [
+                    ['Design Principles', ['contrast', 'alignment', 'proximity', 'repetition', 'balance']],
+                    ['Color Theory', ['hue', 'saturation', 'value', 'complementary colors', 'color harmony']],
+                    ['Typography', ['typeface', 'font size', 'line height', 'kerning', 'readability']],
+                    ['Layout and Composition', ['grid system', 'visual hierarchy', 'white space', 'focal point', 'rhythm']],
+                    ['Brand and Production', ['brand guidelines', 'logo clear space', 'RGB', 'CMYK', 'export resolution']],
+                ],
+                '3D & Animation': [
+                    ['3D Modeling Basics', ['vertices', 'edges', 'faces', 'extrusion', 'topology']],
+                    ['Materials and Lighting', ['shader', 'texture mapping', 'roughness', 'key light', 'ambient light']],
+                    ['Rigging and Skinning', ['armature', 'bone hierarchy', 'weight painting', 'inverse kinematics', 'deformation']],
+                    ['Animation Principles', ['keyframe', 'timing', 'spacing', 'anticipation', 'squash and stretch']],
+                    ['Rendering and Compositing', ['camera framing', 'render engine', 'samples', 'ambient occlusion', 'compositing']],
+                ],
+                'Video Editing': [
+                    ['Editing Workflow', ['media organization', 'timeline', 'rough cut', 'fine cut', 'export preset']],
+                    ['Cuts and Transitions', ['jump cut', 'match cut', 'cross dissolve', 'L-cut', 'J-cut']],
+                    ['Audio for Video', ['sample rate', 'audio levels', 'noise reduction', 'voice-over', 'sound mix']],
+                    ['Color Correction', ['white balance', 'exposure', 'contrast', 'color grading', 'scopes']],
+                    ['Motion and Delivery', ['keyframes', 'title animation', 'proxy media', 'codec', 'bitrate']],
+                ],
+                'UX/UI': [
+                    ['User Research', ['interviews', 'survey', 'observation', 'persona', 'user journey']],
+                    ['Information Architecture', ['sitemap', 'card sorting', 'navigation', 'content grouping', 'labeling']],
+                    ['Wireframes and Prototypes', ['low fidelity', 'wireframe', 'interaction flow', 'prototype', 'iteration']],
+                    ['UI Visual Design', ['design system', 'component', 'spacing', 'visual hierarchy', 'accessibility']],
+                    ['Usability Testing', ['test scenario', 'task success', 'think aloud', 'qualitative insight', 'iteration']],
+                ],
+                'Digital Marketing': [
+                    ['Marketing Strategy', ['target audience', 'value proposition', 'marketing objective', 'competitor analysis', 'customer journey']],
+                    ['Content Marketing', ['content pillar', 'editorial calendar', 'storytelling', 'call to action', 'content repurposing']],
+                    ['SEO and Search', ['keyword intent', 'on-page SEO', 'backlinks', 'technical SEO', 'organic traffic']],
+                    ['Social Media Campaigns', ['content format', 'engagement', 'hashtag strategy', 'community management', 'campaign objective']],
+                    ['Analytics and Optimization', ['conversion rate', 'click-through rate', 'A/B testing', 'KPI', 'return on ad spend']],
+                ]
+            };
+
+            const lesson = questionBank[skill]?.[lessonNumber - 1];
+            if (lesson) {
+                const [topic, concepts] = lesson;
+                const questionStems = [
+                    `ข้อใดเป็นแนวคิดหลักของบท ${topic}?`,
+                    `เมื่อนำ ${topic} ไปใช้งาน ข้อใดเหมาะสมที่สุด?`,
+                    `ข้อใดเป็นองค์ประกอบสำคัญที่ควรตรวจสอบในเรื่อง ${topic}?`,
+                    `หากต้องอธิบาย ${topic} ให้ผู้เริ่มต้น ควรเริ่มจากข้อใด?`,
+                    `แนวทางใดช่วยให้ผลงานด้าน ${topic} มีคุณภาพมากขึ้น?`
+                ];
+                const distractors = [
+                    [concepts[1], concepts[2], concepts[3], concepts[4]],
+                    [concepts[2], concepts[3], concepts[4], concepts[0]],
+                    [concepts[3], concepts[4], concepts[0], concepts[1]],
+                    [concepts[4], concepts[0], concepts[1], concepts[2]],
+                    [concepts[1], concepts[3], concepts[0], concepts[2]]
+                ];
+                const shuffle = values => values.sort(() => Math.random() - 0.5);
+                questionList.replaceChildren();
+                questionStems.forEach((question, questionIndex) => {
+                    const item = document.createElement('div');
+                    item.className = 'practice-question-item';
+                    const heading = document.createElement('h2');
+                    heading.textContent = `${questionIndex + 1}. ${question}`;
+                    const options = document.createElement('div');
+                    options.className = 'lesson-practice-options';
+                    const answers = shuffle([{ text: concepts[questionIndex], value: 0 }, ...distractors[questionIndex].map(text => ({ text, value: 1 }))]);
+                    answers.forEach(answer => {
+                        const label = document.createElement('label');
+                        const input = document.createElement('input');
+                        input.type = 'radio';
+                        input.name = `answers[${questionIndex}]`;
+                        input.value = answer.value;
+                        input.required = true;
+                        const text = document.createElement('span');
+                        text.textContent = answer.text;
+                        label.append(input, document.createTextNode(' '), text);
+                        options.append(label);
+                    });
+                    item.append(heading, options);
+                    questionList.append(item);
+                });
+            }
+        }
+
+        const scoreCard = document.querySelector('#practice-score-card');
+        if (!practiceForm || !scoreCard) return;
+
+        practiceForm.addEventListener('submit', () => {
+            const correctAnswers = (practiceForm.dataset.correctAnswers || '').split(',').filter(Boolean).map(Number);
+            const selectedAnswers = correctAnswers.map((_, index) => {
+                const selected = practiceForm.querySelector(`input[name="answers[${index}]"]:checked`);
+                return selected ? Number(selected.value) : -1;
+            });
+            const score = selectedAnswers.reduce((total, answer, index) => total + (answer === correctAnswers[index] ? 1 : 0), 0);
+            const total = correctAnswers.length;
+            const passed = total > 0 && score >= Math.ceil(total * .6);
+
+            scoreCard.querySelector('[data-practice-score]').textContent = score;
+            scoreCard.querySelector('[data-practice-progress]').style.width = `${total === 0 ? 0 : score * 100 / total}%`;
+            scoreCard.querySelector('[data-practice-status]').textContent = passed
+                ? 'ผ่านแล้ว เยี่ยมมาก!'
+                : 'ลองทบทวนอีกครั้งแล้วทำใหม่ได้เลย';
+            scoreCard.style.display = 'grid';
+            scoreCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    })();
+</script>

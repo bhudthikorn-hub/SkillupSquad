@@ -1,0 +1,468 @@
+.auth-page,
+html.dark-theme .auth-page {
+    min-height: 100vh;
+    background: radial-gradient(circle at 8% 12%, rgba(128, 112, 238, .16), transparent 30%),
+        radial-gradient(circle at 92% 88%, rgba(73, 190, 219, .16), transparent 28%),
+        linear-gradient(135deg, #f8f1ff 0%, #edf8ff 100%) !important;
+    color: #17213b !important;
+    font-family: 'Noto Sans Thai', 'DM Sans', sans-serif;
+}
+
+.auth-page .social-button,
+html.dark-theme .auth-page .social-button {
+    color: #34384b !important;
+    background: #fff !important;
+    border-color: #dce1ed !important;
+}
+
+.auth-page .social-button strong,
+html.dark-theme .auth-page .social-button strong {
+    color: #4285f4 !important;
+}
+
+.auth-page .social-button.line strong,
+html.dark-theme .auth-page .social-button.line strong {
+    color: #22be52 !important;
+}
+
+.auth-page .or-divider span,
+html.dark-theme .auth-page .or-divider span {
+    color: #888b99 !important;
+    background: #fff !important;
+}
+
+.auth-page .login-brand,
+html.dark-theme .auth-page .login-brand {
+    color: #17213b !important;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -.8px;
+    text-shadow: 0 8px 18px rgba(89, 75, 201, .14);
+    position: relative;
+}
+
+.auth-page .login-brand::after {
+    content: '';
+    display: block;
+    width: 42px;
+    height: 4px;
+    margin: 8px auto 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #7462ee, #58c5d8);
+}
+
+.auth-page .login-card,
+html.dark-theme .auth-page .login-card {
+    background: #fff !important;
+    border: 1px solid rgba(225, 229, 240, .9);
+    box-shadow: 0 24px 60px rgba(80, 84, 150, .18), 0 4px 12px rgba(80, 84, 150, .06) !important;
+    transform: translateY(0);
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.auth-page .login-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 28px 68px rgba(80, 84, 150, .22), 0 5px 14px rgba(80, 84, 150, .07) !important;
+}
+
+.auth-page .login-welcome,
+html.dark-theme .auth-page .login-welcome {
+    background: linear-gradient(145deg, #fbf2ff 0%, #f1f5ff 55%, #e9f8ff 100%) !important;
+    color: #17213b !important;
+}
+
+.auth-page .login-welcome h1,
+html.dark-theme .auth-page .login-welcome h1,
+.auth-page .login-form-panel h2,
+html.dark-theme .auth-page .login-form-panel h2 {
+    color: #17213b !important;
+}
+
+.auth-page .login-welcome p,
+html.dark-theme .auth-page .login-welcome p,
+.auth-page .login-subtitle,
+html.dark-theme .auth-page .login-subtitle {
+    color: #69738a !important;
+}
+
+.auth-page .login-form-panel,
+html.dark-theme .auth-page .login-form-panel {
+    background: #fff !important;
+    color: #17213b !important;
+}
+
+.auth-page .login-form-panel form {
+    margin-top: 24px;
+}
+
+.auth-page .login-form-panel .signup-prompt {
+    margin-top: 18px;
+}
+
+.auth-page .login-form-panel label,
+html.dark-theme .auth-page .login-form-panel label {
+    color: #3d4962 !important;
+}
+
+.auth-page .login-form-panel input,
+html.dark-theme .auth-page .login-form-panel input {
+    color: #17213b !important;
+    background: #fff !important;
+    border-color: #dce1ed !important;
+}
+
+.auth-page .login-form-panel input::placeholder,
+html.dark-theme .auth-page .login-form-panel input::placeholder {
+    color: #9aa3b5 !important;
+}
+
+.auth-page .signup-prompt,
+html.dark-theme .auth-page .signup-prompt,
+.auth-page .remember-login,
+html.dark-theme .auth-page .remember-login {
+    color: #69738a !important;
+}
+
+.auth-page .remember-login,
+html.dark-theme .auth-page .remember-login {
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    width: fit-content;
+    margin: 14px 0 5px;
+    color: #59647b !important;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+}
+
+.auth-page .remember-checkbox {
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+}
+
+.auth-page .remember-checkbox input[type="checkbox"] {
+    position: absolute;
+    inset: 0;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.auth-page .remember-checkmark {
+    position: absolute;
+    inset: 0;
+    display: block;
+    border: 1.5px solid #cbd2e2;
+    border-radius: 7px;
+    background: #fff;
+    transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.auth-page .remember-checkmark::after {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 10px;
+    top: 3px;
+    left: 6px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    opacity: 0;
+    transform: rotate(45deg);
+}
+
+.auth-page .remember-checkbox input[type="checkbox"]:checked + .remember-checkmark {
+    border-color: #6355df;
+    background: linear-gradient(135deg, #7462ee, #594bc9);
+    box-shadow: 0 4px 10px rgba(99, 85, 223, .25);
+}
+
+.auth-page .remember-checkbox input[type="checkbox"]:checked + .remember-checkmark::after {
+    opacity: 1;
+}
+
+.auth-page .remember-checkbox input[type="checkbox"]:focus-visible + .remember-checkmark {
+    outline: 3px solid rgba(99, 85, 223, .2);
+    outline-offset: 2px;
+}
+
+.auth-page .signup-prompt a,
+html.dark-theme .auth-page .signup-prompt a,
+.auth-page .forgot,
+html.dark-theme .auth-page .forgot {
+    color: #594bc9 !important;
+}
+
+.auth-page .auth-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: min(100%, 360px);
+    height: 340px;
+    margin: 0 auto 18px;
+    overflow: hidden;
+    background: transparent !important;
+}
+
+.auth-page .auth-art img {
+    display: block;
+    width: 118%;
+    height: 118%;
+    max-width: none;
+    max-height: none;
+    object-fit: contain;
+    filter: none !important;
+}
+
+.auth-page .password-reset-card {
+    display: block;
+    max-width: 520px;
+    min-height: 0;
+}
+
+.auth-page .password-reset-card .login-form-panel {
+    padding: 46px 54px;
+}
+
+@media (max-width: 650px) {
+    .auth-page,
+    html.dark-theme .auth-page {
+        min-height: 100vh;
+    }
+
+    .auth-page .auth-art {
+        width: min(100%, 300px);
+        height: 250px;
+        margin-bottom: 12px;
+    }
+}
+
+.remove-course-modal[hidden] {
+    display: none;
+}
+
+.remove-course-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+}
+
+.remove-course-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(24, 29, 58, .42);
+    backdrop-filter: blur(4px);
+}
+
+.remove-course-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 410px);
+    padding: 32px 30px 28px;
+    border: 1px solid rgba(255, 255, 255, .8);
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: 0 24px 70px rgba(37, 39, 93, .26);
+    text-align: center;
+    animation: remove-course-pop .2s ease-out;
+}
+
+.remove-course-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 15px;
+    border-radius: 16px;
+    background: #fff1ed;
+    color: #e06452;
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.remove-course-dialog h2 {
+    margin: 0;
+    color: #17213b;
+    font-size: 21px;
+}
+
+.remove-course-dialog p {
+    margin: 10px 0 24px;
+    color: #69738a;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.remove-course-dialog p strong {
+    color: #3d4962;
+}
+
+.remove-course-close {
+    position: absolute;
+    top: 13px;
+    right: 15px;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 50%;
+    background: #f4f5fa;
+    color: #7a8296;
+    font-size: 21px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.remove-course-close:hover {
+    background: #eceef6;
+}
+
+.remove-course-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.remove-course-actions button {
+    min-width: 112px;
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.remove-course-cancel {
+    background: #f0f1f7;
+    color: #59647b;
+}
+
+.remove-course-confirm {
+    background: linear-gradient(110deg, #ed7866, #d9515c);
+    color: #fff;
+    box-shadow: 0 7px 14px rgba(217, 81, 92, .2);
+}
+
+.remove-course-confirm:hover {
+    filter: brightness(.96);
+}
+
+html.dark-theme .remove-course-dialog,
+body.dark-mode .remove-course-dialog {
+    border-color: #334155;
+    background: #1e293b;
+    color: #f8fafc;
+    box-shadow: 0 24px 70px rgba(2, 6, 23, .55);
+}
+
+html.dark-theme .remove-course-dialog h2,
+body.dark-mode .remove-course-dialog h2 {
+    color: #f8fafc;
+}
+
+html.dark-theme .remove-course-dialog p,
+body.dark-mode .remove-course-dialog p {
+    color: #cbd5e1;
+}
+
+html.dark-theme .remove-course-dialog p strong,
+body.dark-mode .remove-course-dialog p strong {
+    color: #f8fafc;
+}
+
+html.dark-theme .remove-course-close,
+body.dark-mode .remove-course-close {
+    background: #334155;
+    color: #cbd5e1;
+}
+
+html.dark-theme .remove-course-close:hover,
+body.dark-mode .remove-course-close:hover {
+    background: #475569;
+    color: #f8fafc;
+}
+
+html.dark-theme .remove-course-cancel,
+body.dark-mode .remove-course-cancel {
+    background: #334155;
+    color: #f8fafc;
+}
+
+html.dark-theme .remove-course-cancel:hover,
+body.dark-mode .remove-course-cancel:hover {
+    background: #475569;
+}
+
+html.dark-theme .remove-course-confirm,
+body.dark-mode .remove-course-confirm {
+    background: linear-gradient(110deg, #ef6b78, #c9445a);
+    color: #fff;
+}
+
+html.dark-theme .remove-course-confirm:hover,
+body.dark-mode .remove-course-confirm:hover {
+    filter: brightness(1.08);
+}
+
+.explore-learning-card {
+    position: relative;
+}
+
+.explore-remove-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    border: 0;
+    border-radius: 8px;
+    background: #fff1ed;
+    color: #d95c55;
+    font-size: 18px;
+    line-height: 20px;
+    cursor: pointer;
+}
+
+.explore-remove-button:hover {
+    background: #ffe2dc;
+}
+
+html.dark-theme .explore-remove-button,
+body.dark-mode .explore-remove-button {
+    border: 1px solid #475569;
+    background: #3b2630;
+    color: #fda4af;
+}
+
+html.dark-theme .explore-remove-button:hover,
+body.dark-mode .explore-remove-button:hover {
+    background: #5b2d3b;
+    color: #fecdd3;
+}
+
+@keyframes remove-course-pop {
+    from { opacity: 0; transform: translateY(8px) scale(.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 480px) {
+    .remove-course-dialog {
+        padding: 28px 20px 22px;
+    }
+
+    .remove-course-actions button {
+        min-width: 0;
+        flex: 1;
+    }
+}

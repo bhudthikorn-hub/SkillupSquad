@@ -1,0 +1,45 @@
+@model AdminDashboardViewModel
+@using System.Text.Json
+@{ ViewData["Title"] = "Dashboard"; Layout = "_AdminLayout"; }
+<div class="admin-page-heading"><div><h1>Dashboard</h1></div></div>
+<div class="admin-stat-grid">
+    <div class="admin-stat-card"><span>Total Learners</span><b>@Model.TotalLearners</b><i class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></i></div>
+    <div class="admin-stat-card"><span>Active Courses</span><b>@Model.ActiveCourses</b><i class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></i></div>
+    <div class="admin-stat-card"><span>Avg. Completion Rate</span><b>@Model.AverageCompletionRate%</b><i class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></i></div>
+    <div class="admin-stat-card"><span>Quiz Pass Rate</span><b>@Model.QuizPassRate</b><i class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></i></div>
+</div>
+<div class="admin-dashboard-grid">
+    <section class="admin-panel"><div class="admin-panel-heading"><h2>Weekly Learner Engagement</h2><span class="admin-muted">New enrollments, last 7 days</span></div><div class="chart-wrap"><canvas id="engagementChart"></canvas></div></section>
+    <section class="admin-panel"><h2>Popular Skill Categories</h2><div class="category-chart-wrap"><canvas id="categoryChart"></canvas></div></section>
+</div>
+<section class="admin-panel admin-table-panel"><h2>Recent Course Activity</h2><table class="admin-table"><thead><tr><th>Course Name</th><th>Status</th><th>Learners</th><th>Completion</th><th>Recent activity</th></tr></thead><tbody>
+@foreach (var course in Model.RecentCourses)
+{
+    <tr><td>@course.Name</td><td><span class="status @(course.Status == "Active" ? "active-status" : "draft-status")">@course.Status</span></td><td>@course.Learners</td><td>@course.CompletionRate%</td><td>@course.RecentActivity</td></tr>
+}
+@if (Model.RecentCourses.Count == 0)
+{
+    <tr><td colspan="5">No course activity yet.</td></tr>
+}
+</tbody></table></section>
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+const engagementLabels = @Html.Raw(JsonSerializer.Serialize(Model.EngagementLabels));
+const engagementData = @Html.Raw(JsonSerializer.Serialize(Model.EngagementData));
+const categoryLabels = @Html.Raw(JsonSerializer.Serialize(Model.CategoryLabels));
+const categoryData = @Html.Raw(JsonSerializer.Serialize(Model.CategoryData));
+const isAdminDarkMode = () => document.documentElement.classList.contains('dark-theme');
+const adminChartTextColor = () => '#ffffff';
+new Chart(document.getElementById('engagementChart'), { type:'line', data:{ labels:engagementLabels, datasets:[{ label:'New enrollments', data:engagementData, borderColor:'#6366f1', backgroundColor:'#6366f122', fill:true, tension:.4, pointRadius:3 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,grid:{color:'#e5e7eb'}},x:{grid:{display:false}}} } });
+let categoryChart;
+if (categoryLabels.length > 0) {
+    categoryChart = new Chart(document.getElementById('categoryChart'), { type:'doughnut', data:{ labels:categoryLabels, datasets:[{ data:categoryData, backgroundColor:['#6366f1','#22c55e','#f59e0b','#ec4899','#14b8a6','#f97316'], borderWidth:0 }] }, options:{ responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:12,color:adminChartTextColor()}}} } });
+}
+document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
+    if (!categoryChart) return;
+    categoryChart.options.plugins.legend.labels.color = adminChartTextColor();
+    categoryChart.update();
+});
+</script>
+}

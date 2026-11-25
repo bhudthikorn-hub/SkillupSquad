@@ -1,0 +1,35 @@
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SkillUp Admin</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body class="admin-body">
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <a class="admin-brand" asp-controller="Admin" asp-action="Dashboard"><span class="admin-brand-icon">▟</span> SkillUp <small>Admin</small></a>
+            <nav class="admin-nav">
+                <a class="@(action == "Dashboard" ? "active" : "")" asp-controller="Admin" asp-action="Dashboard"><span>▦</span> Dashboard</a>
+                <a class="@(action == "Courses" ? "active" : "")" asp-controller="Admin" asp-action="Courses"><span>▣</span> Course Management</a>
+                <a class="@(action == "Quizzes" ? "active" : "")" asp-controller="Admin" asp-action="Quizzes"><span>▤</span> Quiz &amp; Assessment</a>
+                <a class="@(action == "Users" ? "active" : "")" asp-controller="Admin" asp-action="Users"><span>♙</span> User Management</a>
+            </nav>
+        </aside>
+        <div class="admin-main-shell">
+            <header class="admin-topbar">
+                <label class="admin-search"><span>⌕</span><input type="search" data-admin-search autocomplete="off" placeholder="Search users, courses, quizzes" aria-label="Search admin data" /><div class="admin-search-results" data-admin-search-results hidden></div></label>
+                <div class="admin-top-actions"><button class="admin-theme-toggle" data-theme-toggle type="button" aria-label="Toggle theme"><span>☀</span></button><span class="admin-avatar">A</span><b>Admin</b><form asp-controller="Account" asp-action="Logout" method="post"><button class="admin-logout" type="submit">Logout</button></form></div>
+            </header>
+            <main class="admin-content">@RenderBody()</main>
+        </div>
+    </div>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
